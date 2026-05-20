@@ -52,20 +52,29 @@ class Song:
         else:
             self.interface.pause(1)
 
-    def choose(self, songs_arguments):
-        path = songs_arguments["path"]
-        song = songs_arguments["name"]
-        art = songs_arguments["artist"]
-        self.duration = int(songs_arguments["duration"])
-        pygame.mixer.music.load(path)
-        pygame.mixer.music.play()
-        pygame.mixer.music.set_volume(1.0)
-        size = int(25 * min(1, (25 / len(song))))
-        self.interface.choose_song_intf(song, art, size, self.duration)
-        self.music_start_time = time.time()
-        self.music_paused_time = 0
-        self.isplay = True
-        self.update()
+    def choose_del(self, songs_arguments):
+        if self.setting.state == 'play':
+            path = songs_arguments["path"]
+            song = songs_arguments["name"]
+            art = songs_arguments["artist"]
+            self.duration = int(songs_arguments["duration"])
+            pygame.mixer.music.load(path)
+            pygame.mixer.music.play()
+            pygame.mixer.music.set_volume(1.0)
+            size = int(25 * min(1, (25 / len(song))))
+            self.interface.choose_song_intf(song, art, size, self.duration)
+            self.music_start_time = time.time()
+            self.music_paused_time = 0
+            self.isplay = True
+            self.update()
+        elif self.setting.state == 'del':
+            idx = songs_arguments["idx"]
+            with open("playlist.json", "r", encoding="utf-8") as f:
+                play = json.load(f)
+            del play[idx]
+            with open("playlist.json", "w", encoding="utf-8") as f:
+                json.dump(sorted(play, key=lambda play: play["name"]), f)
+            self.setting.draw_playlist()
 
     def add(self):
         songpath = filedialog.askopenfilename(
@@ -85,11 +94,10 @@ class Song:
             except Exception:
                 play = []
             if not any(s.get("path") == songpath for s in play):
-                play.append(play, key=lambda play: play["name"])
+                play.append(song)
                 with open("playlist.json", "w", encoding="utf-8") as f:
-                    json.dump(play, f)
-                    self.setting.mlist = tk.StringVar(value="Выберите сонг")
-                    self.setting.update_playlist()
+                    json.dump(sorted(play, key=lambda play: play["name"]), f)
+                self.setting.draw_playlist()
 
     def skip_sec(self):
         if self.isplay:
@@ -99,9 +107,10 @@ class Song:
             self.update()
 
     def rewind(self, new_time):
-        pygame.mixer.music.play(start=new_time)
-        self.music_start_time = time.time() - new_time
-        self.update()
+        if self.isplay:
+            pygame.mixer.music.play(start=new_time)
+            self.music_start_time = time.time() - new_time
+            self.update()
 
     def return_sec(self):
         if self.isplay:

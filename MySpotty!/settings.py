@@ -7,11 +7,26 @@ class Setting:
         self.song = song
         self.root = root
         self.interface = interface
-        self.main_frame = tk.Frame(self.root)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)  # .place(x=501, y=0)
+        self.states = ['play', 'del']
+        self.state = 'play'
+
+        # === ФИКСИРОВАННЫЙ ВЕРХНИЙ ФРЕЙМ (опционально) ===
+        self.top_frame = tk.Frame(root, bg='#424642', height=50)
+        self.top_frame.pack(fill=tk.X, side=tk.TOP)
+        self.top_frame.pack_propagate(False)
+
+        title = tk.Label(self.top_frame, text="НАСТРОЙКИ",
+                         font=("Arial", 16, "bold"), fg="white", bg="#424642")
+        title.pack(expand=True)
+
+        # === ПРОКРУЧИВАЕМАЯ ОБЛАСТЬ ===
+        self.main_frame = tk.Frame(root)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
         self.canvas = tk.Canvas(
             self.main_frame, bg='#F3F4ED', highlightthickness=0)
         self.canvas.pack(side='left', fill='both', expand=True)
+
         scrollbar = tk.Scrollbar(
             self.main_frame, orient='vertical', command=self.canvas.yview)
         scrollbar.pack(side='right', fill='y')
@@ -22,87 +37,98 @@ class Setting:
         self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
 
         self.inner_frame.bind("<Configure>", self._update_scrollregion)
-
         self.canvas.bind("<MouseWheel>", self._on_mousewheel)
+
+        # === ФИКСИРОВАННЫЙ НИЖНИЙ ФРЕЙМ ===
+        self.bottom_frame = tk.Frame(root, bg='#424642', height=80)
+        self.bottom_frame.pack(fill=tk.X, side=tk.BOTTOM)
+        self.bottom_frame.pack_propagate(False)
+
+        self.change_mode = tk.Button(
+            self.bottom_frame, text="Show playlist",
+            bg="#C06014", fg="white", font=("Arial", 12),
+            command=self.draw_playlist
+        )
+        self.change_mode.pack()
+
+        self.add_btn = tk.Button(
+            self.bottom_frame, text="Add song",
+            bg="#C06014", fg="white", font=("Arial", 12),
+            command=self.song.add
+        )
+        self.add_btn.pack(padx=20)
+
+        self.del_btn = tk.Button(
+            self.bottom_frame, text="Delete song",
+            bg="#C06014", fg="white", font=("Arial", 12),
+            command= self.change_state
+        )
+        self.del_btn.pack(padx=20)
+
         self.draw_setting()
 
     def draw_setting(self):
-        self.canvas.delete('all')
+        for widget in self.inner_frame.winfo_children():
+            widget.destroy()
 
-        # self.choose_btn = self.canvas.create_window(250, 100, window=tk.Button(
-        #    self.root, text="Выбрать", width=12, height=2, command=self.song.choose))
-        # self.choose_btn.pack()
-
-        # self.mlist = tk.StringVar(value="Выберите песню")
-        # self.song_option_menu = None
-        # self.update_playlist()
-
-        # self.open_button = self.canvas.create_window(250, 150, window=tk.Button(
-        #    self.root, text="Добавить в плейлист", width=20, height=2, command=self.song.add))
-
-        self.change_theme_btn = self.canvas.create_window(250, 100, window=tk.Button(
-            self.root, text="Поменять тему", width=20, height=2, command=self.interface.redraw))
+        # Кнопка смены темы
+        self.change_theme_btn = tk.Button(
+            self.inner_frame, text="Поменять тему", width=20, height=2,
+            command=self.interface.redraw
+        )
+        self.change_theme_btn.pack(pady=10)
 
         self.tlist = tk.StringVar(value="Choose theme")
         self.theme_option_menu = None
         self.update_themelist()
 
-        self.change_mode = self.canvas.create_window(250, 200, window=tk.Button(
-            self.root, text="Show playlist", width=20, height=2, command=self.draw_playlist))
-        # self.open_button.pack(pady=5)
-
-        # self.addnewgr = tk.Button(self.label, text="Добавить из Newgrounds", command=song.add_song_from_newgr)
-        # self.addnewgr.pack(pady=5)
-
-        # self.song_id = tk.Entry(self.label)
-        # self.song_id.pack(pady=5)
-        # self.song_id.insert(0, "Введите ID")
     def draw_playlist(self):
-        self.canvas.delete('all')
-        self.change_mode = self.canvas.create_window(250, 100, window=tk.Button(
-            self.root, text="Show setting", width=20, height=2, command=self.draw_setting))
+        # Очищаем inner_frame
+        for widget in self.inner_frame.winfo_children():
+            widget.destroy()
+
         with open("playlist.json", "r", encoding="utf-8") as f:
             data = json.load(f)
-            data = sorted(data, key=lambda data: data["name"])
+
         for i in data:
-            y = data.index(i) * 100
-            self.canvas.create_rectangle(
-                20, y + 10, 450, y + 100, width=3, fill="#536162", outline='#424642', tags=f"song{data.index(i)}"
-            )
+            idx = data.index(i)
+            y = idx * 100
+            i["idx"] = idx
+            # Фрейм для каждой песни (внутри inner_frame)
+            song_frame = tk.Frame(self.inner_frame, bg='#F3F4ED')
+            song_frame.pack(fill=tk.X, pady=5, padx=10)
+
+            # Прямоугольник (фон)
+            canvas_item = tk.Canvas(song_frame, width=450, height=90,
+                                    bg='#536162', highlightthickness=0)
+            canvas_item.pack()
+            canvas_item.create_rectangle(
+                0, 0, 450, 90, fill="#536162", outline="#424642", width=3)
+
+            # Название песни
             size = int(25 * min(1, (25 / len(i["name"]))))
-            self.canvas.create_text(
-                440, y + 30, text=i["name"], fill="#F3F4ED", anchor="e", font=("Arial", size, "bold"), tags=f"song{data.index(i)}")
-            self.canvas.create_text(
-                440, y + 60, text=i["artist"] if i["artist"] else "\u2014", fill="#F3F4ED", anchor="e", font=("Arial", 15), tags=f"song{data.index(i)}")
+            canvas_item.create_text(440, 25, text=i["name"], fill="#F3F4ED",
+                                    anchor="e", font=("Arial", size, "bold"))
+
+            # Исполнитель
+            artist_text = i["artist"] if i["artist"] else "\u2014"
+            canvas_item.create_text(440, 55, text=artist_text, fill="#F3F4ED",
+                                    anchor="e", font=("Arial", 15))
+
+            # Длительность
             dtime = int(i["duration"])
-            self.canvas.create_text(
-                440, y + 85, text=f"{int(dtime//60):02d}:{int(dtime-dtime//60*60):02d}", fill="#F3F4ED", anchor="e", font=("Arial", 15), tags=f"song{data.index(i)}")
-            self.canvas.tag_bind(
-                f"song{data.index(i)}", "<Button-1>", lambda e, i=i: self.song.choose(i))
+            time_text = f"{int(dtime//60):02d}:{int(dtime - dtime//60 * 60):02d}"
+            canvas_item.create_text(440, 80, text=time_text, fill="#F3F4ED",
+                                    anchor="e", font=("Arial", 15))
+
+            song_frame.bind("<Button-1>", lambda e, i=i: self.song.choose_del(i))
+            canvas_item.bind("<Button-1>", lambda e, i=i: self.song.choose_del(i))
 
     def _update_scrollregion(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def _on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-
-    def update_playlist(self):
-        if self.song_option_menu:
-            self.song_option_menu.destroy()
-
-        try:
-            with open("playlist.json", "r", encoding="utf-8") as f:
-                data = json.load(f)
-                song_names = [i["name"]
-                              for i in data]
-                song_names = sorted(song_names)
-        except Exception:
-            song_names = ["Нет песен"]
-
-        self.song_option_menu = self.canvas.create_window(
-            250, 200, window=tk.OptionMenu(self.root, self.mlist, *song_names))
-        # self.option_menu.pack(pady=5)
-        self.mlist.set(song_names[0] if song_names else "Выберите песню")
 
     def update_themelist(self):
         if self.theme_option_menu:
@@ -111,13 +137,16 @@ class Setting:
         try:
             with open("themes.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
-                theme_names = [i["name"]
-                               for i in data]
+                theme_names = [i["name"] for i in data]
                 theme_names = sorted(theme_names)
         except Exception:
             theme_names = ["There no themes"]
 
-        self.theme_option_menu = self.canvas.create_window(
-            250, 150, window=tk.OptionMenu(self.root, self.tlist, *theme_names))
-        # self.option_menu.pack(pady=5)
+        self.theme_option_menu = tk.OptionMenu(
+            self.inner_frame, self.tlist, *theme_names)
+        self.theme_option_menu.pack(pady=10)
         self.tlist.set(theme_names[0] if theme_names else "Choose theme")
+
+    def change_state(self):
+        self.state = self.states[abs(self.states.index(self.state) - 1)]
+        print(self.state)

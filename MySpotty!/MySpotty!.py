@@ -1,6 +1,6 @@
 import tkinter as tk  # 1234816
 import sliders
-import interfaces
+import interfaces 
 import settings
 import song
 import keyboard
@@ -47,5 +47,6 @@ keyboard.hook(lambda e: player.pause() if e.name ==
 #              keyboard.KeyboardEvent(name='space', event_type='down', scan_code=57) else None)
 
 root.bind("<KeyPress>", on_key)
+
 
 root.mainloop()
