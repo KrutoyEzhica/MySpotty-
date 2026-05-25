@@ -3,14 +3,18 @@
         "name": "Light",
         "bg": "#F3F4ED",
         "btns": "#536162",
-        "btns2": "#424642",
-        "slider": "#C06014"
+        "outlines": "#424642",
+        "slider": "#C06014",
+        "text": "#424642",
+        "title": "#F3F4ED"
     },
     {
         "name": "Dark",
         "bg": "#323643",
         "btns": "#F7F7F7",
-        "btns2": "#606470",
-        "slider": "#93DEFF"
+        "outlines": "#606470",
+        "slider": "#93DEFF",
+        "text": "#F7F7F7",
+        "title": "#F7F7F7"
     }
 ]

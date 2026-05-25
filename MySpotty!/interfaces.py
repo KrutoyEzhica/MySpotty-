@@ -1,10 +1,11 @@
 import json
 class Interface:
-    def __init__(self, canvas, song, root):
+    def __init__(self, canvas, song, root, slider):
         self.set = False
         self.root = root
         self.canvas = canvas
         self.setting = None
+        self.slider = slider
         self.setting_btn = canvas.create_rectangle(
             440, 25, 480, 65, fill="#536162", width=3, outline='#424642', tags='setting')
         # canvas.create_arc(60, 500, 100, 540, width=3, outline='#424642', start=270, extent=270, style="arc")
@@ -62,6 +63,8 @@ class Interface:
             340, 507, 366, 520, 340, 533, fill="#536162", width=3, outline='#424642')
         self.next2 = canvas.create_line(
             369, 507, 369, 533, width=5, fill="#424642")
+        
+
 
 
     def redraw(self):
@@ -69,13 +72,29 @@ class Interface:
         with open("themes.json", "r", encoding="utf-8") as f:
             for i in json.load(f):
                 if theme == i["name"]:
-                    colors = i["bg"], i["btns"], i["btns2"], i["slider"]
+                    colors = i["bg"], i["btns"], i["outlines"], i["slider"], i["text"], i ["title"]
                     break
-        self.canvas.config(bg=colors[0])
-        self.canvas.itemconfig(self.setting_btn, fill=colors[1], outline=colors[2])
-        self.canvas.itemconfig(self.photo, fill=colors[1], outline=colors[2])
-        self.canvas.itemconfig(self.name, fill=colors[1],)
-        self.canvas.itemconfig(self.art_name, fill=colors[2])
+        self.canvas.config(bg=colors[0])#
+        self.canvas.itemconfig(self.setting_btn, fill=colors[1], outline=colors[2])#
+        self.canvas.itemconfig(self.photo, fill=colors[1], outline=colors[2])#
+        self.canvas.itemconfig(self.name, fill=colors[1])#
+        self.canvas.itemconfig(self.art_name, fill=colors[2])#
+        self.canvas.itemconfig(self.time_s, fill=colors[3])#
+        self.canvas.itemconfig(self.time_m, fill=colors[4])#
+        self.canvas.itemconfig(self.cur_time_s, fill=colors[3])#
+        self.canvas.itemconfig(self.cur_time_m, fill=colors[4])#
+        self.canvas.itemconfig(
+            self.pause_btn, fill=colors[1], outline=colors[2])#
+        self.canvas.itemconfig(self.p, fill=colors[0], outline=colors[2])#
+        self.canvas.itemconfig(self.p1, fill=colors[0], outline=colors[2])#
+        self.canvas.itemconfig(self.p2, fill=colors[0], outline=colors[2])#
+        self.canvas.itemconfig(self.previous1, fill=colors[1], outline=colors[2])
+        self.canvas.itemconfig(self.previous2, fill=colors[2])
+        self.canvas.itemconfig(self.next1, fill=colors[1], outline=colors[2])
+        self.canvas.itemconfig(self.next2, fill=colors[2])
+        self.slider.recolor(colors)
+        self.setting.recolor(colors)
+
 
 
     def choose_song_intf(self, song, artist, size, dtime):

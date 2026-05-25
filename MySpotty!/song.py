@@ -73,7 +73,7 @@ class Song:
                 play = json.load(f)
             del play[idx]
             with open("playlist.json", "w", encoding="utf-8") as f:
-                json.dump(sorted(play, key=lambda play: play["name"]), f)
+                json.dump(sorted(play, key=lambda play: play["name"].lower()), f)
             self.setting.draw_playlist()
 
     def add(self):
@@ -96,7 +96,8 @@ class Song:
             if not any(s.get("path") == songpath for s in play):
                 play.append(song)
                 with open("playlist.json", "w", encoding="utf-8") as f:
-                    json.dump(sorted(play, key=lambda play: play["name"]), f)
+                    json.dump(
+                        sorted(play, key=lambda play: play["name"].lower()), f)
                 self.setting.draw_playlist()
 
     def skip_sec(self):
@@ -107,10 +108,9 @@ class Song:
             self.update()
 
     def rewind(self, new_time):
-        if self.isplay:
-            pygame.mixer.music.play(start=new_time)
-            self.music_start_time = time.time() - new_time
-            self.update()
+        pygame.mixer.music.play(start=new_time)
+        self.music_start_time = time.time() - new_time
+        self.update()
 
     def return_sec(self):
         if self.isplay:

@@ -1,6 +1,6 @@
 import tkinter as tk  # 1234816
 import sliders
-import interfaces 
+import interfaces
 import settings
 import song
 import keyboard
@@ -19,7 +19,7 @@ def on_key(event):
         player.volume_down()
     elif event.keycode == 83:
         interface.toggle_setting()
-    #print(event)
+    # print(event)
 
 
 root = tk.Tk()
@@ -31,11 +31,12 @@ canvas = tk.Canvas(root, width=500, height=600, bg='#F3F4ED')
 canvas.pack(side='left')
 
 player = song.Song(canvas, root)
-slider = sliders.Slider(canvas, 40, 440, 20, player, bounds=(40, 440, 460, 460))
-interface = interfaces.Interface(canvas, player, root)
+slider = sliders.Slider(canvas, 40, 440, 20, player,
+                        bounds=(40, 440, 460, 460))
+interface = interfaces.Interface(canvas, player, root, slider)
 setting = settings.Setting(root, player, interface)
-playlist = None 
-player.slider, player.interface, player.setting, interface.setting= slider, interface, setting, setting
+playlist = None
+player.slider, player.interface, player.setting, interface.setting = slider, interface, setting, setting
 
 keyboard.hook(lambda e: player.pause() if e.name ==
               "play/pause media" else None)  # -179
