@@ -69,8 +69,13 @@ class Slider:
         if not self.isdrag:
             new_x = int(song_prec * 4 + 40)
             self.canvas.coords(self.obj, new_x, 440, new_x + self.width, 460)
+        self.canvas.coords(
+            self.line1, self.bounds[0] + self.width // 2, self.bounds[1] +
+            self.width // 2, new_x +
+            self.width, self.bounds[3] - self.width // 2
+        )
     
     def recolor(self, colors):
         self.canvas.itemconfig(self.line, fill=colors[1])
+        self.canvas.itemconfig(self.line1, fill=colors[3])
         self.canvas.itemconfig(self.obj, fill=colors[2])
-        self.canvas.itemconfig(self.obj, fill=colors[3])
