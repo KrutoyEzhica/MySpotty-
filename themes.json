@@ -1,0 +1,135 @@
+[
+    {
+        "main": 2
+    },
+    {
+        "name": "Light",
+        "bg": {
+            "bg": "#F3F4ED"
+        },
+        "setting_btn": {
+            "fill": "#536162",
+            "outline": "#424642"
+        },
+        "photo": {
+            "fill": "#536162",
+            "outline": "#424642"
+        },
+        "song": {
+            "fill": "#424642"
+        },
+        "art_name": {
+            "fill": "#536162"
+        },
+        "seconds": {
+            "fill": "#C06014"
+        },
+        "minutes": {
+            "fill": "#424642"
+        },
+        "pause_btn": {
+            "fill": "#536162",
+            "outline": "#424642"
+        },
+        "p": {
+            "fill": "#F3F4ED",
+            "outline": "#424642"
+        },
+        "rewind": {
+            "fill": "#536162",
+            "outline": "#424642"
+        },
+        "lines": {
+            "fill": "#424642"
+        },
+        "hitbox": {
+            "fill": "#F3F4ED"
+        },
+        "slider": [
+            "#536162",
+            "#C06014",
+            "#424642"
+        ],
+        "setting": {
+            "canvas": "#F3F4ED",
+            "top_frame": "#536162",
+            "title": {
+                "bg": "#536162",
+                "fg": "#F3F4ED"
+            },
+            "inner_frame": "#F3F4ED",
+            "bottom_frame": "#536162",
+            "btn": "#C06014"
+        },
+        "playlist": {
+            "song_frame": "#F3F4ED",
+            "canvas": "#536162 ",
+            "text": "#F3F4ED"
+        }
+    },
+    {
+        "name": "Dark",
+        "bg": {
+            "bg": "#323643"
+        },
+        "setting_btn": {
+            "fill": "#F7F7F7",
+            "outline": "#606470"
+        },
+        "photo": {
+            "fill": "#F7F7F7",
+            "outline": "#606470"
+        },
+        "song": {
+            "fill": "#F7F7F7"
+        },
+        "art_name": {
+            "fill": "#606470"
+        },
+        "seconds": {
+            "fill": "#93DEFF"
+        },
+        "minutes": {
+            "fill": "#F7F7F7"
+        },
+        "pause_btn": {
+            "fill": "#F7F7F7",
+            "outline": "#606470"
+        },
+        "p": {
+            "fill": "#323643",
+            "outline": "#606470"
+        },
+        "rewind": {
+            "fill": "#F7F7F7",
+            "outline": "#606470"
+        },
+        "lines": {
+            "fill": "#606470"
+        },
+        "hitbox": {
+            "fill": "#323643"
+        },
+        "slider": [
+            "#F7F7F7",
+            "#93DEFF",
+            "#606470"
+        ],
+        "setting": {
+            "canvas": "#323643",
+            "top_frame": "#606470",
+            "title": {
+                "bg": "#606470",
+                "fg": "#F7F7F7"
+            },
+            "inner_frame": "#323643",
+            "bottom_frame": "#606470",
+            "btn": "#93DEFF"
+        },
+        "playlist": {
+            "song_frame": "#F7F7F7",
+            "canvas": "#606470",
+            "text": "#F7F7F7"
+        }
+    }
+]

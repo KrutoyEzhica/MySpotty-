@@ -1,0 +1,181 @@
+import pygame
+import json
+import os
+import newgroundsdl
+import glob
+import time
+import tkinter as tk
+from tinytag import TinyTag
+from tkinter import filedialog
+
+
+class Song:
+    def __init__(self, canvas, root):
+        self.id = -1
+        self.previous_song_info = None
+        self.song_info = None
+        self.next_song_info = None
+        self.duration = 0
+        self.canvas = canvas
+        self.slider = None
+        self.setting = None
+        self.interface = None
+        self.root = root
+        self.isplay = False
+        self.cur_time = 0
+        self.music_start_time = 0
+        self.music_paused_time = 0
+        self.volume = 1.0
+        pygame.init()
+        pygame.mixer.init()
+
+    def pause(self):
+        if self.isplay:
+            self.music_paused_time = self.get_current_position()
+            pygame.mixer.music.pause()
+
+        else:
+            pygame.mixer.music.unpause()
+            self.music_start_time = time.time() - self.music_paused_time
+        self.interface.pause(self.isplay)
+        self.isplay = not self.isplay
+        self.update()
+
+    def get_current_position(self):
+        if self.isplay:
+            return time.time() - self.music_start_time
+        else:
+            return self.music_paused_time
+
+    def update(self):
+        if self.isplay and pygame.mixer.music.get_busy():
+            self.cur_time = self.get_current_position()
+            self.interface.update_cur_time(self.cur_time)
+            self.slider.song_move(
+                int(self.cur_time / self.duration * 100) * 4 + 40)
+            self.root.after(50, lambda: self.update())
+        else:
+            if self.isplay:
+                self.next_song()
+            else:
+                self.interface.pause(1)
+
+    def choose_del(self, songs_arguments):
+        if self.setting.state == 'play':
+            self.song_info = songs_arguments
+            self.id = songs_arguments["idx"]
+            path = songs_arguments["path"]
+            song = songs_arguments["name"]
+            art = songs_arguments["artist"]
+            self.duration = int(songs_arguments["duration"])
+            pygame.mixer.music.load(path)
+            pygame.mixer.music.play()
+            pygame.mixer.music.set_volume(1.0)
+            size = int(25 * min(1, (25 / len(song))))
+            self.interface.choose_song_intf(song, art, size, self.duration)
+            self.music_start_time = time.time()
+            self.music_paused_time = 0
+            self.isplay = True
+            self.update()
+        elif self.setting.state == 'del':
+            idx = songs_arguments["idx"]
+            with open("playlist.json", "r", encoding="utf-8") as f:
+                play = json.load(f)
+            del play[idx]
+            with open("playlist.json", "w", encoding="utf-8") as f:
+                json.dump(
+                    sorted(play, key=lambda play: play["name"].lower()), f)
+            self.setting.draw_playlist()
+
+    def add(self):
+        songpath = filedialog.askopenfilename(
+            title="Выбрать файл", filetypes=[("Аудиофайлы", "*.mp3")]
+        )
+        if songpath != "":
+            tag = TinyTag.get(songpath)
+            song = {
+                "path": songpath,
+                "name": tag.title if tag.title else os.path.basename(songpath),
+                "artist": tag.artist,
+                "duration": tag.duration,
+            }
+            try:
+                with open("playlist.json", "r", encoding="utf-8") as f:
+                    play = json.load(f)
+            except Exception:
+                play = []
+            if not any(s.get("path") == songpath for s in play):
+                play.append(song)
+                play = sorted(play, key=lambda play: play["name"].lower())
+                with open("playlist.json", "w", encoding="utf-8") as f:
+                    json.dump(play, f)
+                if pygame.mixer.music.get_busy():
+                    for i in play:
+                        if i == self.song_info:
+                            self.id = play.index(i)
+                            break
+                    self.next_song_info, self.previous_song_info = play[self.id +
+                                                                        1], play[self.id - 1]
+                self.setting.draw_playlist()
+
+    def skip_sec(self):
+        if self.isplay:
+            new_time = min(self.get_current_position() + 10, self.duration)
+            pygame.mixer.music.play(start=new_time)
+            self.music_start_time = time.time() - new_time
+            self.update()
+
+    def rewind(self, new_time):
+        pygame.mixer.music.play(start=new_time)
+        self.music_start_time = time.time() - new_time
+        self.update()
+
+    def return_sec(self):
+        if self.isplay:
+            new_time = max(self.get_current_position() - 10, 0)
+            pygame.mixer.music.play(start=new_time)
+            self.music_start_time = time.time() - new_time
+            self.update()
+
+    def volume_up(self):
+        if self.isplay:
+            self.volume = min(1.0, self.volume + 0.1)
+            pygame.mixer.music.set_volume(self.volume)
+
+    def volume_down(self):
+        if self.isplay:
+            self.volume = max(0.0, self.volume - 0.1)
+            pygame.mixer.music.set_volume(self.volume)
+
+
+    def next_song(self):
+        try:
+            with open("playlist.json", "r", encoding="utf-8") as f:
+                play = json.load(f)
+
+            if self.id + 1 >= len(play):
+                self.id = 0
+            else:
+                self.id += 1
+
+            self.song_info = play[self.id]
+            self.song_info["idx"] = self.id
+            self.choose_del(self.song_info)
+        except Exception as e:
+            print(f"Ошибка переключения: {e}")
+
+    def previous_song(self):
+        try:
+            with open("playlist.json", "r", encoding="utf-8") as f:
+                play = json.load(f)
+            
+            if self.id - 1 < 0:
+                self.id = len(play) - 1
+            else:
+                self.id -= 1
+            
+            self.song_info = play[self.id]
+            self.song_info["idx"] = self.id
+            self.choose_del(self.song_info)
+        except Exception as e:
+            print(f"Ошибка переключения: {e}")
